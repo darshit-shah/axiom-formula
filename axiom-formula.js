@@ -1,6 +1,6 @@
 ! function() {
   if (typeof require === "function") {
-    utils = require("axiom-utils");
+    axiomUtils = require("axiom-utils");
   }
   "use strict";
   var AxiomFormula = {};
@@ -48,13 +48,13 @@
                 rowStart = rowEnd;
                 rowEnd = tmp;
               }
-              var localIndex = utils.getIndexOf(formulaReferenceKeys, result[resIndex].part, false);
+              var localIndex = axiomUtils.getIndexOf(formulaReferenceKeys, result[resIndex].part, false);
               if (localIndex == -1) {
-                localIndex = utils.getIndexOf(formulaReferenceKeys, result[resIndex].part, true);
+                localIndex = axiomUtils.getIndexOf(formulaReferenceKeys, result[resIndex].part, true);
                 formulaReferenceValues.splice(localIndex, 0, [colStart, rowStart, colEnd, rowEnd]);
               }
             } else if (result[resIndex].type == 'const') {
-              utils.getIndexOf(formulaVariables, result[resIndex].part, true);
+              axiomUtils.getIndexOf(formulaVariables, result[resIndex].part, true);
               //formulaVariables.push(result[resIndex]['part']);
             }
           }
@@ -114,7 +114,11 @@
             if (tree.children[childIndex].part == '') {
               tree.children[childIndex].result = result.children[0].result;
             } else {
-              tree.children[childIndex].result = FormulasMathods[tree.children[childIndex].part.toUpperCase()](result.children);
+              if (FormulasMathods.hasOwnProperty(tree.children[childIndex].part.toUpperCase())) {
+                tree.children[childIndex].result = FormulasMathods[tree.children[childIndex].part.toUpperCase()](result.children);
+              } else {
+                tree.children[childIndex].result = FormulasMathods["unknownFunction"](result.children, tree.children[childIndex].part);
+              }
             }
           }
         } else {
@@ -142,6 +146,23 @@
     }
 
     var FormulasMathods = {
+      unknownFunction: function(data, functionName) {
+        var params = [];
+        for (var i = 0; i < data.length; i++) {
+          if (data[i].result !== undefined) {
+            params.push(data[i].result);
+          } else if (data[i].type == 'const') {
+            params.push(options.variableValues[data[i].part]);
+          } else if (data[i].type == 'ref') {
+            for (var r = 0; r < options.rangeValues[data[i].part].length; r++) {
+              for (var c = 0; c < options.rangeValues[data[i].part][r].length; c++) {
+                params.push(options.rangeValues[data[i].part][r][c]);
+              }
+            }
+          }
+        }
+        return eval(functionName)(params);
+      },
       SUM: function(data) {
         var sum = 0;
         for (var i = 0; i < data.length && !isNaN(sum); i++) {
@@ -705,6 +726,23 @@
             if (formula.charAt(formula.length - 1) === ")") {
               var index = 0;
               var funtionName = "";
+              var params = formula.trim().substr(index + 1, formula.trim().length - (index + 2));
+              retValues.push({ part: funtionName, isReference: false, depth: depth, type: 'Func Start', result: undefined });
+              var splitCommaValues = splitByComma(params);
+              for (var i = 0; i < splitCommaValues.length; i++) {
+                splitValues = [];
+                splitValues.push(splitCommaValues[i]);
+                retValues = retValues.concat(getSplitValues(splitValues, depth + 1));
+              }
+              return retValues;
+            } else {
+              retValues = retValues.concat(getSplitValues(splitFormula(formula), depth + 1));
+              return retValues;
+            }
+          } else if (formula.toLowerCase().trim().indexOf("(") > 0) {
+            if (formula.charAt(formula.length - 1) === ")") {
+              var index = formula.trim().indexOf("(");
+              var funtionName = formula.trim().substr(0, index);
               var params = formula.trim().substr(index + 1, formula.trim().length - (index + 2));
               retValues.push({ part: funtionName, isReference: false, depth: depth, type: 'Func Start', result: undefined });
               var splitCommaValues = splitByComma(params);
