@@ -983,7 +983,7 @@
             }
         }
         function processFurther(arrFormulas) {
-            var arrSeq = ["^", "/", "*", "-", "+", "=", "<", ">", "<=", ">=", "!=", "<>"];
+            var arrSeq = ["^", "/", "*", "-", "+", "=", "<", ">", "<=", ">=", "!=", "<>","%"];
             for (var i = 0; i < arrSeq.length && arrFormulas.length > 1; i++) {
                 var index = arrFormulas.indexOf(arrSeq[i], 1);
                 while (index !== -1 && index < (arrFormulas.length - 1)) {
@@ -1038,6 +1038,9 @@
             }
             else if (operator === '>=') {
                 return +val1 >= +val2;
+            }
+            else if (operator === '%') {
+                return +val1 % +val2;
             }
             else
                 return NaN;
@@ -1179,6 +1182,9 @@
                 return true;
             }
             else if (operator === '>') {
+                return true;
+            }
+            else if (operator === '%') {
                 return true;
             }
             return false;
