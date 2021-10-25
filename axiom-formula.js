@@ -373,7 +373,7 @@
                 for (var i = 0; i < data.length; i++) {
                     if (data[i].result !== undefined) {
                         if (data[i].result.toString() !== "")
-                            if (data[0].result == "true" || data[0].result == true || +data[0].result == 1)
+                            if (data[i].result == "true" || data[i].result == true || +data[i].result == 1)
                                 return true;
                     }
                     else if (data[i].type == 'const') {
