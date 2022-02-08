@@ -87,7 +87,7 @@
                     if (tree.children[childIndex].type == "Operation Start") {
                         var arrFormulas = [];
                         if (result.children[0].result !== undefined)
-                            arrFormulas.push(result.children[0].result.toString());
+                            arrFormulas.push(typeof(result.children[0].result) === 'number' ? result.children[0].result : result.children[0].result.toString());
                         else if (result.children[0].type == 'const')
                             arrFormulas.push(options.variableValues[result.children[0].part]);
                         else if (result.children[0].type == 'ref') {
@@ -100,7 +100,7 @@
                         for (var evalIndex = 1; evalIndex < result.children.length; evalIndex += 2) {
                             arrFormulas.push(result.children[evalIndex].part);
                             if (result.children[evalIndex + 1].result != undefined && result.children[evalIndex + 1].result != null)
-                                arrFormulas.push(result.children[evalIndex + 1].result.toString());
+                                arrFormulas.push(typeof(result.children[evalIndex + 1].result)==='number'?result.children[evalIndex + 1].result:result.children[evalIndex + 1].result.toString());
                             else if (result.children[evalIndex + 1].type == 'const')
                                 arrFormulas.push(options.variableValues[result.children[evalIndex + 1].part]);
                             else if (result.children[evalIndex + 1].type == 'ref') {
